@@ -7,6 +7,7 @@ import (
 	"github.com/danysoftdev/p-go-create/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var collection *mongo.Collection
@@ -35,6 +36,48 @@ func ObtenerPersonaPorDocumento(documento string) (models.Persona, error) {
 	return persona, err
 }
 
+// ObtenerTodasPersonas devuelve todas las personas en la colección
+func ObtenerTodasPersonas() ([]models.Persona, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []models.Persona
+	for cursor.Next(ctx) {
+		var p models.Persona
+		if err := cursor.Decode(&p); err != nil {
+			return nil, err
+		}
+		results = append(results, p)
+	}
+	return results, nil
+}
+
+// ActualizarPersona actualiza campos de una persona por documento usando un mapa (actualización parcial)
+func ActualizarPersona(documento string, update map[string]interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"documento": documento}
+	updateDoc := bson.M{"$set": update}
+	_, err := collection.UpdateOne(ctx, filter, updateDoc, &options.UpdateOptions{})
+	return err
+}
+
+// EliminarPersona elimina físicamente la persona por documento
+func EliminarPersona(documento string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := collection.DeleteOne(ctx, bson.M{"documento": documento})
+	return err
+}
+
 type RealPersonaRepository struct{}
 
 func (r RealPersonaRepository) InsertarPersona(p models.Persona) error {
@@ -43,4 +86,16 @@ func (r RealPersonaRepository) InsertarPersona(p models.Persona) error {
 
 func (r RealPersonaRepository) ObtenerPersonaPorDocumento(doc string) (models.Persona, error) {
 	return ObtenerPersonaPorDocumento(doc)
+}
+
+func (r RealPersonaRepository) ObtenerTodasPersonas() ([]models.Persona, error) {
+	return ObtenerTodasPersonas()
+}
+
+func (r RealPersonaRepository) ActualizarPersona(documento string, update map[string]interface{}) error {
+	return ActualizarPersona(documento, update)
+}
+
+func (r RealPersonaRepository) EliminarPersona(documento string) error {
+	return EliminarPersona(documento)
 }

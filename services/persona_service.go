@@ -51,3 +51,27 @@ func CrearPersona(p models.Persona) error {
 
 	return Repo.InsertarPersona(p)
 }
+
+// ObtenerPersona devuelve una persona por documento
+func ObtenerPersona(documento string) (models.Persona, error) {
+	return Repo.ObtenerPersonaPorDocumento(documento)
+}
+
+// ObtenerTodasPersonas devuelve todas las personas
+func ObtenerTodasPersonas() ([]models.Persona, error) {
+	return Repo.ObtenerTodasPersonas()
+}
+
+// ActualizarPersona actualiza una persona por documento usando un mapa parcial
+func ActualizarPersona(documento string, update map[string]interface{}) error {
+	// No permitir cambiar el documento
+	if _, ok := update["documento"]; ok {
+		return errors.New("no está permitido cambiar el documento")
+	}
+	return Repo.ActualizarPersona(documento, update)
+}
+
+// EliminarPersona elimina una persona por documento
+func EliminarPersona(documento string) error {
+	return Repo.EliminarPersona(documento)
+}

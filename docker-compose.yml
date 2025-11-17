@@ -1,25 +1,90 @@
+version: '3.8'
 services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mongo-data:/data/db
+      - ./backups:/backups
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   create-service:
-    image: danysoftdev/p-go-create:latest
-    container_name: microservicio-create
+    build:
+      context: .
+      dockerfile: ./cmd/create/Dockerfile
+    ports:
+      - "8081:8081"
     env_file:
       - .env
-    restart: always
-    ports:
-      - "8081:8080"
-    networks:
-      - parcial_go_mongo_net
-
-  tester:
-    image: curlimages/curl
     depends_on:
-      - create-service
-    networks:
-      - parcial_go_mongo_net
-    entrypoint: [ "sh", "-c", "sleep 15 && curl -s --fail http://create-service:8080 || exit 1" ]
-    profiles:
-      - test
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-networks:
-  parcial_go_mongo_net:
-    external: true
+  read-service:
+    build:
+      context: .
+      dockerfile: ./cmd/read/Dockerfile
+    ports:
+      - "8082:8082"
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  update-service:
+    build:
+      context: .
+      dockerfile: ./cmd/update/Dockerfile
+    ports:
+      - "8083:8083"
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  delete-service:
+    build:
+      context: .
+      dockerfile: ./cmd/delete/Dockerfile
+    ports:
+      - "8084:8084"
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8084/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mongo-data:

@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "p-go-create CRUD",
+    "_postman_id": "replace-this-id",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Create",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "http://localhost:8081/", "protocol": "http", "host": ["localhost"], "port": "8081", "path": [""] }
+      }
+    },
+    {
+      "name": "Create Persona",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"documento\": \"1234\", \"nombre\": \"Test\" }" },
+        "url": { "raw": "http://localhost:8081/crear-personas", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["crear-personas"] }
+      }
+    },
+    {
+      "name": "Get Persona",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8082/personas/1234", "protocol": "http", "host": ["localhost"], "port": "8082", "path": ["personas","1234"] }
+      }
+    },
+    {
+      "name": "Update Persona",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"nombre\": \"Nuevo\" }" },
+        "url": { "raw": "http://localhost:8083/personas/1234", "protocol": "http", "host": ["localhost"], "port": "8083", "path": ["personas","1234"] }
+      }
+    },
+    {
+      "name": "Delete Persona",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "http://localhost:8084/personas/1234", "protocol": "http", "host": ["localhost"], "port": "8084", "path": ["personas","1234"] }
+      }
+    }
+  ]
+}
+
