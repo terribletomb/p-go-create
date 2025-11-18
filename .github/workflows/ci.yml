@@ -30,10 +30,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
+
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
@@ -41,13 +43,14 @@ jobs:
             ~/.cache/go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
       - name: Run unit tests
         run: go test ./... -v -cover -tags='!integration'
 
-      - name: Wait for Mongo to be reachable
+      - name: Wait for Mongo service (job service)
         run: |
-          echo "Waiting for MongoDB to be reachable on 127.0.0.1:27017..."
-          for i in $(seq 1 30); do
+          echo "Waiting for MongoDB on 127.0.0.1:27017 (job service) to be reachable..."
+          for i in $(seq 1 60); do
             if bash -c "</dev/tcp/127.0.0.1/27017" >/dev/null 2>&1; then
               echo "Mongo reachable"
               break
@@ -61,6 +64,7 @@ jobs:
           MONGO_DB: ${{ env.MONGO_DB }}
           COLLECTION_NAME: ${{ env.COLLECTION_NAME }}
         run: go test ./... -v -tags=integration
+
 
   build_and_push:
     needs: test
