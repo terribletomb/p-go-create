@@ -27,10 +27,6 @@ services:
       - "8081:8081"
     env_file:
       - .env
-    environment:
-      MONGO_URI: ${MONGO_URI}
-      MONGO_DB: ${MONGO_DB}
-      COLLECTION_NAME: ${COLLECTION_NAME}
     depends_on:
       mongo:
         condition: service_healthy
@@ -48,10 +44,6 @@ services:
       - "8082:8082"
     env_file:
       - .env
-    environment:
-      MONGO_URI: ${MONGO_URI}
-      MONGO_DB: ${MONGO_DB}
-      COLLECTION_NAME: ${COLLECTION_NAME}
     depends_on:
       mongo:
         condition: service_healthy
@@ -69,10 +61,6 @@ services:
       - "8083:8083"
     env_file:
       - .env
-    environment:
-      MONGO_URI: ${MONGO_URI}
-      MONGO_DB: ${MONGO_DB}
-      COLLECTION_NAME: ${COLLECTION_NAME}
     depends_on:
       mongo:
         condition: service_healthy
@@ -90,10 +78,6 @@ services:
       - "8084:8084"
     env_file:
       - .env
-    environment:
-      MONGO_URI: ${MONGO_URI}
-      MONGO_DB: ${MONGO_DB}
-      COLLECTION_NAME: ${COLLECTION_NAME}
     depends_on:
       mongo:
         condition: service_healthy
