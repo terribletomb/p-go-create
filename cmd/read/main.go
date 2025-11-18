@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/danysoftdev/p-go-create/config"
 	"github.com/danysoftdev/p-go-create/controllers"
@@ -14,6 +15,12 @@ import (
 )
 
 func main() {
+	// Debug: imprimir variables de entorno relevantes
+	uri := os.Getenv("MONGO_URI")
+	db := os.Getenv("MONGO_DB")
+	col := os.Getenv("COLLECTION_NAME")
+	log.Printf("ENV MONGO_URI=%s MONGO_DB=%s COLLECTION_NAME=%s", uri, db, col)
+
 	if err := config.ConectarMongo(); err != nil {
 		log.Fatal("Error conectando a Mongo: ", err)
 	}
@@ -31,4 +38,3 @@ func main() {
 	fmt.Printf("Read service escuchando en %s\n", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }
-
