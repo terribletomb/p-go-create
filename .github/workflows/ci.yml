@@ -10,6 +10,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: secret
+          MONGO_INITDB_DATABASE: personas_db
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand({ ping: 1 })' --quiet || mongo --eval 'db.adminCommand({ ping: 1 })' --quiet"
+          --health-interval=10s --health-timeout=5s --health-retries=5
+
+    env:
+      MONGO_URI: mongodb://admin:secret@127.0.0.1:27017/?authSource=admin
+      MONGO_DB: personas_db
+      COLLECTION_NAME: personas
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
@@ -25,7 +43,23 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Run unit tests
         run: go test ./... -v -cover -tags='!integration'
+
+      - name: Wait for Mongo to be reachable
+        run: |
+          echo "Waiting for MongoDB to be reachable on 127.0.0.1:27017..."
+          for i in $(seq 1 30); do
+            if bash -c "</dev/tcp/127.0.0.1/27017" >/dev/null 2>&1; then
+              echo "Mongo reachable"
+              break
+            fi
+            sleep 1
+          done
+
       - name: Run integration tests
+        env:
+          MONGO_URI: ${{ env.MONGO_URI }}
+          MONGO_DB: ${{ env.MONGO_DB }}
+          COLLECTION_NAME: ${{ env.COLLECTION_NAME }}
         run: go test ./... -v -tags=integration
 
   build_and_push:
