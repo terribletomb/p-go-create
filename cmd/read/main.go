@@ -19,6 +19,20 @@ func main() {
 	uri := os.Getenv("MONGO_URI")
 	db := os.Getenv("MONGO_DB")
 	col := os.Getenv("COLLECTION_NAME")
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		if uri == "" {
+			uri = "mongodb://admin:secret@127.0.0.1:27017/?authSource=admin"
+			_ = os.Setenv("MONGO_URI", uri)
+		}
+		if db == "" {
+			db = "personas_db"
+			_ = os.Setenv("MONGO_DB", db)
+		}
+		if col == "" {
+			col = "personas"
+			_ = os.Setenv("COLLECTION_NAME", col)
+		}
+	}
 	log.Printf("ENV MONGO_URI=%s MONGO_DB=%s COLLECTION_NAME=%s", uri, db, col)
 
 	if err := config.ConectarMongo(); err != nil {

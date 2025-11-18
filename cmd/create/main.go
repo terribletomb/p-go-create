@@ -19,6 +19,21 @@ func main() {
 	uri := os.Getenv("MONGO_URI")
 	db := os.Getenv("MONGO_DB")
 	col := os.Getenv("COLLECTION_NAME")
+	// Si estamos en GitHub Actions y las variables vienen vacías, usar fallback al servicio job (127.0.0.1)
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		if uri == "" {
+			uri = "mongodb://admin:secret@127.0.0.1:27017/?authSource=admin"
+			_ = os.Setenv("MONGO_URI", uri)
+		}
+		if db == "" {
+			db = "personas_db"
+			_ = os.Setenv("MONGO_DB", db)
+		}
+		if col == "" {
+			col = "personas"
+			_ = os.Setenv("COLLECTION_NAME", col)
+		}
+	}
 	masked := uri
 	// no exponer credenciales en logs si están en la URI; opcional
 	log.Printf("ENV MONGO_URI=%s MONGO_DB=%s COLLECTION_NAME=%s", masked, db, col)

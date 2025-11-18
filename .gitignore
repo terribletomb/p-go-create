@@ -15,8 +15,7 @@ backups/
 # Go Modules
 vendor/
 
-# Env file
-.env
+
 
 # Secret files
 k8s/create/secrets-create.yaml
