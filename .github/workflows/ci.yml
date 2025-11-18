@@ -43,17 +43,33 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub (if configured)
+        if: ${{ secrets.DOCKERHUB_USER && secrets.DOCKERHUB_TOKEN }}
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set image registry (fallback)
+        run: |
+          if [ -n "${{ secrets.GITHUB_REGISTRY }}" ]; then
+            echo "REGISTRY=${{ secrets.GITHUB_REGISTRY }}" >> $GITHUB_ENV
+          elif [ -n "${{ secrets.DOCKERHUB_USER }}" ]; then
+            echo "REGISTRY=docker.io/${{ secrets.DOCKERHUB_USER }}" >> $GITHUB_ENV
+          else
+            echo "::error::No registry configured. Set GITHUB_REGISTRY or DOCKERHUB_USER secrets." 
+            exit 1
+          fi
       - name: Build and push images (create/read/update/delete)
         env:
-          GITHUB_REGISTRY: ${{ secrets.GITHUB_REGISTRY }}
           DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
         run: |
-          docker buildx build --platform linux/amd64 -t ${{ env.GITHUB_REGISTRY }}/p-go-create:create -f ./cmd/create/Dockerfile ./ --push
-          docker buildx build --platform linux/amd64 -t ${{ env.GITHUB_REGISTRY }}/p-go-create:read -f ./cmd/read/Dockerfile ./ --push
-          docker buildx build --platform linux/amd64 -t ${{ env.GITHUB_REGISTRY }}/p-go-create:update -f ./cmd/update/Dockerfile ./ --push
-          docker buildx build --platform linux/amd64 -t ${{ env.GITHUB_REGISTRY }}/p-go-create:delete -f ./cmd/delete/Dockerfile ./ --push
+          echo "Using registry: $REGISTRY"
+          docker buildx build --platform linux/amd64 -t $REGISTRY/p-go-create:create -f ./cmd/create/Dockerfile ./ --push
+          docker buildx build --platform linux/amd64 -t $REGISTRY/p-go-create:read -f ./cmd/read/Dockerfile ./ --push
+          docker buildx build --platform linux/amd64 -t $REGISTRY/p-go-create:update -f ./cmd/update/Dockerfile ./ --push
+          docker buildx build --platform linux/amd64 -t $REGISTRY/p-go-create:delete -f ./cmd/delete/Dockerfile ./ --push
       - name: Trivy scan (scan created images)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ secrets.GITHUB_REGISTRY }}/p-go-create:create
-
+          image-ref: ${{ env.REGISTRY }}/p-go-create:create
