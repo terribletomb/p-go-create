@@ -43,15 +43,15 @@ jobs:
           echo "🌐 Running integration tests..."
           go test -v ./... -tags=integration
 
-      - name: 🌱 Create .env file (for Mongo and microservice)
+      
+
+      - name: Crear archivo .env para Docker Compose
         run: |
-          echo "MONGO_ROOT_USER=${{ secrets.MONGO_ROOT_USER }}" > .env
-          echo "MONGO_ROOT_PASS=${{ secrets.MONGO_ROOT_PASS }}" >> .env
-          echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> .env
-          echo "MONGO_HOST={{ secrets.MONGO_HOST }}" >> .env
-          echo "MONGO_PORT={{ secrets.MONGO_PORT }}" >> .env
-          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
-          echo "COLLECTION_NAME=${{ secrets.COLLECTION_NAME }}" >> .env
+          echo "MONGO_URI=mongodb://admin:secret@mongo:27017/?authSource=admin" > .env
+          echo "MONGO_DB=personas_db" >> .env
+          echo "COLLECTION_NAME=personas" >> .env
+          echo "MONGO_ROOT_USER=admin" >> .env
+          echo "MONGO_ROOT_PASS=secret" >> .env
 
       - name: 🔁 Run Docker Compose Integration Test (mongo and create-service)
         run: |
