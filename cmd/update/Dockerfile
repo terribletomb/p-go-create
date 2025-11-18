@@ -11,4 +11,6 @@ FROM alpine:3.18
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/update /update
 EXPOSE 8083
+RUN apt-get update && apt-get install -y curl
+
 ENTRYPOINT ["/update"]

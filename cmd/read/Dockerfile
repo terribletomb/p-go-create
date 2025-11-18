@@ -11,4 +11,6 @@ FROM alpine:3.18
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/read /read
 EXPOSE 8082
+RUN apt-get update && apt-get install -y curl
+
 ENTRYPOINT ["/read"]

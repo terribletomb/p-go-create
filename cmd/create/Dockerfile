@@ -5,10 +5,12 @@ ENV CGO_ENABLED=0
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+
 RUN go build -o /app/create ./cmd/create
 
 FROM alpine:3.18
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/create /create
 EXPOSE 8081
+RUN apt-get update && apt-get install -y curl
 ENTRYPOINT ["/create"]
